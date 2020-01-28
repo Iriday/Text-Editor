@@ -1,6 +1,7 @@
 package editor;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class TextEditor extends JFrame {
 
@@ -10,17 +11,18 @@ public class TextEditor extends JFrame {
 
     private void createView() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(300, 300);
+        setSize(500, 300);
         setTitle("Text Editor");
         setLocationRelativeTo(null);
-        setLayout(null);
+        setLayout(new BorderLayout());
 
         JTextArea jTextArea = new JTextArea();
         jTextArea.setName("TextArea");
-        jTextArea.setSize(300, 300);
-        jTextArea.setLocation(0, 0);
 
-        add(jTextArea);
+        JScrollPane jScrollPane = new JScrollPane(jTextArea);
+        jScrollPane.setName("ScrollPane");
+
+        add(jScrollPane);
 
         setVisible(true);
     }

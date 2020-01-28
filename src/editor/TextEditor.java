@@ -7,11 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class TextEditor extends JFrame {
-    JTextArea textAreaEditor;
-    JPanel northPanel;
-    JTextField textFieldFilepath;
-    JButton buttonSave;
-    JScrollPane scrollPaneEditor;
+    private JTextArea textAreaEditor;
+    private JPanel northPanel;
+    private JTextField textFieldFilepath;
+    private JButton buttonSave;
+    private JButton buttonLoad;
+    private JScrollPane scrollPaneEditor;
 
     public TextEditor() {
         createView();
@@ -60,7 +61,23 @@ public class TextEditor extends JFrame {
             }
         });
 
+        buttonLoad = new JButton("Load");
+        buttonLoad.setName("LoadButton");
+        buttonLoad.addActionListener(actionEvent -> {
+            try {
+                Path filepath = Path.of(textFieldFilepath.getText());
+                textAreaEditor.setText(Files.readString(filepath));
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(getContentPane(), "Something went wrong!", "Error", JOptionPane.ERROR_MESSAGE); //e.printStackTrace();
+            }
+        });
+
+        northPanel.add(Box.createHorizontalStrut(4));
         northPanel.add(textFieldFilepath);
+        northPanel.add(Box.createHorizontalStrut(2));
+        northPanel.add(buttonLoad);
+        northPanel.add(Box.createHorizontalStrut(2));
         northPanel.add(buttonSave);
+        northPanel.add(Box.createHorizontalStrut(4));
     }
 }

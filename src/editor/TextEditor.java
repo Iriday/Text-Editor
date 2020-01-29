@@ -1,6 +1,7 @@
 package editor;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,11 +41,13 @@ public class TextEditor extends JFrame {
 
         scrollPaneEditor = new JScrollPane(textAreaEditor);
         scrollPaneEditor.setName("ScrollPane");
+        scrollPaneEditor.setBorder(new EmptyBorder(3, 3, 3, 3));
     }
 
     private void createNorthPanel() {
         northPanel = new JPanel();
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
+        northPanel.setBorder(new EmptyBorder(3, 8, 0, 8));
 
         textFieldFilepath = new JTextField();
         textFieldFilepath.setName("FilenameField");
@@ -68,16 +71,14 @@ public class TextEditor extends JFrame {
                 Path filepath = Path.of(textFieldFilepath.getText());
                 textAreaEditor.setText(Files.readString(filepath));
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(getContentPane(), "Something went wrong!", "Error", JOptionPane.ERROR_MESSAGE); //e.printStackTrace();
+                JOptionPane.showMessageDialog(getContentPane(), "Something went wrong!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        northPanel.add(Box.createHorizontalStrut(4));
         northPanel.add(textFieldFilepath);
         northPanel.add(Box.createHorizontalStrut(2));
         northPanel.add(buttonLoad);
         northPanel.add(Box.createHorizontalStrut(2));
         northPanel.add(buttonSave);
-        northPanel.add(Box.createHorizontalStrut(4));
     }
 }

@@ -14,7 +14,7 @@ public class TextEditor extends JFrame {
     private JPanel northPanel;
     private JTextField textFieldFilepath;
     private JButton buttonSave;
-    private JButton buttonLoad;
+    private JButton buttonOpen;
     private JScrollPane scrollPaneEditor;
     private JMenuBar menuBar;
 
@@ -104,18 +104,28 @@ public class TextEditor extends JFrame {
         textFieldFilepath = new JTextField();
         textFieldFilepath.setName("FilenameField");
 
-        buttonSave = new JButton("Save");
+        buttonSave = new JButton(new ImageIcon("\\icons\\save.png"));
         buttonSave.setName("SaveButton");
         buttonSave.addActionListener(actionListenerSave);
+        setFixedSize(buttonSave, 28, 24);
 
-        buttonLoad = new JButton("Load");
-        buttonLoad.setName("LoadButton");
-        buttonLoad.addActionListener(actionListenerLoad);
+        buttonOpen = new JButton(new ImageIcon("\\icons\\file.png"));
+        buttonOpen.setName("OpenButton");
+        buttonOpen.addActionListener(actionListenerLoad);
+        setFixedSize(buttonOpen, 28, 24);
 
         northPanel.add(textFieldFilepath);
         northPanel.add(Box.createHorizontalStrut(2));
-        northPanel.add(buttonLoad);
+        northPanel.add(buttonOpen);
         northPanel.add(Box.createHorizontalStrut(2));
         northPanel.add(buttonSave);
+    }
+
+    public static JComponent setFixedSize(JComponent component, int width, int height) {
+        Dimension dimension = new Dimension(width, height);
+        component.setMaximumSize(dimension);
+        component.setPreferredSize(dimension);
+        component.setMinimumSize(dimension);
+        return component;
     }
 }

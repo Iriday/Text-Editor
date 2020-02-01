@@ -8,6 +8,8 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TextEditor extends JFrame {
     private JTextArea textAreaEditor;
@@ -21,9 +23,12 @@ public class TextEditor extends JFrame {
     private JScrollPane scrollPaneEditor;
     private JMenuBar menuBar;
     private JFileChooser fileChooser;
+    private JCheckBox checkBoxUseRegEx;
 
     private int searchStartPos = -1;
     private int searchEndPos = -1;
+    private boolean useRegEx = false;
+    private String searchRegEx = "";
     private String searchText = "";
 
     private final ActionListener actionListenerSave = actionEvent -> {
@@ -54,13 +59,31 @@ public class TextEditor extends JFrame {
         }
     };
 
+    Pattern pattern;
+    Matcher matcher;
     private final ActionListener actionListenerStartSearch = actionEvent -> {
+        useRegEx = checkBoxUseRegEx.isSelected();
         String text = textAreaEditor.getText();
-        searchText = textFieldSearch.getText();
-        searchStartPos = text.indexOf(searchText);
 
-        if (searchStartPos != -1) {
+        if (!useRegEx) {
+            searchText = textFieldSearch.getText();
+            searchStartPos = text.indexOf(searchText);
+        } else {
+            searchRegEx = textFieldSearch.getText();
+
+            pattern = Pattern.compile(searchRegEx);
+            matcher = pattern.matcher(text);
+            if (matcher.find()) {
+                searchText = matcher.group();
+                searchStartPos = matcher.start();
+            } else {
+                searchStartPos = -1;
+            }
+        }
+
+        if (searchStartPos != -1) {  //method select text if match
             searchEndPos = searchStartPos + searchText.length();
+
             textAreaEditor.setCaretPosition(searchEndPos);
             textAreaEditor.select(searchStartPos, searchEndPos);
             textAreaEditor.grabFocus();
@@ -71,12 +94,39 @@ public class TextEditor extends JFrame {
         if (searchText.isEmpty()) {
             return;
         }
-        String text = textAreaEditor.getText().substring(0, searchEndPos - 1);
-        searchStartPos = text.lastIndexOf(searchText);
+        String text = textAreaEditor.getText().substring(0, searchEndPos -1);
 
-        if (searchStartPos == -1) { //if the beginning start from the end
-            searchStartPos = textAreaEditor.getText().lastIndexOf(searchText);
+        if (!useRegEx) {
+            searchStartPos = text.lastIndexOf(searchText);
+            if (searchStartPos == -1) { //if the beginning start from the end //search
+                searchStartPos = textAreaEditor.getText().lastIndexOf(searchText);
+            }
+        } else {
+            matcher = pattern.matcher(text); //update in case user edited text
+            String foundLastMatch = "";
+            int startPos = -1;
+
+            if (matcher.find(0)) {
+                foundLastMatch = matcher.group();
+                startPos = matcher.start();
+            } else { //if the beginning start from the end //regEx search
+                text = textAreaEditor.getText();
+                matcher = pattern.matcher(text);
+            }
+
+            while (matcher.find()) {
+                foundLastMatch = matcher.group();
+                startPos = matcher.start();
+            }
+            if (startPos != -1) {
+                searchText = foundLastMatch;
+                searchStartPos = startPos;
+            } else {
+
+                searchStartPos = -1;
+            }
         }
+
         if (searchStartPos != -1) {
             searchEndPos = searchStartPos + searchText.length();
 
@@ -91,11 +141,27 @@ public class TextEditor extends JFrame {
             return;
         }
         String text = textAreaEditor.getText();
-        searchStartPos = text.indexOf(searchText, searchStartPos + 1/*end*/);
-
-        if (searchStartPos == -1) { //if the end start from the beginning
-            searchStartPos = text.indexOf(searchText);
+        if (!useRegEx) {
+            searchStartPos = text.indexOf(searchText, searchStartPos + 1/*end*/);
+            if (searchStartPos == -1) { //if the end start from the beginning //search
+                searchStartPos = text.indexOf(searchText);
+            }
+        } else {
+            matcher = pattern.matcher(text); //update in case user edited text
+            if (matcher.find(searchStartPos + 1)) {
+                searchStartPos = matcher.start();
+                searchText = matcher.group();
+            } else { //if the end start from the beginning //regEx search
+                if (matcher.find(0)) {
+                    searchStartPos = matcher.start();
+                    searchText = matcher.group();
+                } else {
+                    searchStartPos = -1;
+                }
+            }
         }
+
+
         if (searchStartPos != -1) {
             searchEndPos = searchStartPos + searchText.length();
 
@@ -119,6 +185,7 @@ public class TextEditor extends JFrame {
         setLayout(new BorderLayout());
         fileChooser = new JFileChooser();
         fileChooser.setName("FileChooser");
+        add(fileChooser);
 
         createMenuBar();
         createMainField();
@@ -166,10 +233,17 @@ public class TextEditor extends JFrame {
         JMenuItem menuItemNextMatch = new JMenuItem("Next mach");
         menuItemNextMatch.addActionListener(actionListenerNextMatch);
         menuItemNextMatch.setName("MenuNextMatch");
+        JMenuItem menuItemUseRegEx = new JMenuItem("Use regex");
+        menuItemUseRegEx.addActionListener(actionEvent -> {
+            checkBoxUseRegEx.setSelected(!checkBoxUseRegEx.isSelected());
+        });
+        menuItemUseRegEx.setName("MenuUseRegExp");
+
 
         menuSearch.add(menuItemStartSearch);
         menuSearch.add(menuItemPreviousMatch);
         menuSearch.add(menuItemNextMatch);
+        menuSearch.add(menuItemUseRegEx);
 
         //menu bar
         menuBar = new JMenuBar();
@@ -226,6 +300,9 @@ public class TextEditor extends JFrame {
         buttonNextMatch.addActionListener(actionListenerNextMatch);
 
 
+        checkBoxUseRegEx = new JCheckBox("Use regex");
+        checkBoxUseRegEx.setName("UseRegExCheckbox");
+
         northPanel.add(buttonOpen);
         northPanel.add(Box.createHorizontalStrut(widthBetweenComponents));
         northPanel.add(buttonSave);
@@ -237,6 +314,8 @@ public class TextEditor extends JFrame {
         northPanel.add(buttonPreviousMatch);
         northPanel.add(Box.createHorizontalStrut(widthBetweenComponents));
         northPanel.add(buttonNextMatch);
+        northPanel.add(Box.createHorizontalStrut(widthBetweenComponents));
+        northPanel.add(checkBoxUseRegEx);
     }
 
     public static JComponent setFixedSize(JComponent component, int width, int height) {

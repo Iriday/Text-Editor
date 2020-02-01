@@ -120,9 +120,7 @@ public class TextEditor extends JFrame {
     }
 
     private void createMenuBar() {
-        menuBar = new JMenuBar();
-        menuBar.setName("MenuBar");
-
+        //menu file
         JMenu menuFile = new JMenu("File");
         menuFile.setName("MenuFile");
         menuFile.setMnemonic(KeyEvent.VK_F);
@@ -142,7 +140,30 @@ public class TextEditor extends JFrame {
         menuFile.addSeparator();
         menuFile.add(menuItemExit);
 
+        //menu search
+        JMenu menuSearch = new JMenu("Search");
+        menuSearch.setName("MenuSearch");
+        menuSearch.setMnemonic(KeyEvent.VK_S);
+
+        JMenuItem menuItemStartSearch = new JMenuItem("Start search");
+        menuItemStartSearch.addActionListener(actionListenerStartSearch);
+        menuItemStartSearch.setName("MenuStartSearch");
+        JMenuItem menuItemPreviousMatch = new JMenuItem("Previous match");
+        menuItemPreviousMatch.addActionListener(actionListenerPreviousMatch);
+        menuItemPreviousMatch.setName("MenuPreviousMatch");
+        JMenuItem menuItemNextMatch = new JMenuItem("Next mach");
+        menuItemNextMatch.addActionListener(actionListenerNextMatch);
+        menuItemNextMatch.setName("MenuNextMatch");
+
+        menuSearch.add(menuItemStartSearch);
+        menuSearch.add(menuItemPreviousMatch);
+        menuSearch.add(menuItemNextMatch);
+
+        //menu bar
+        menuBar = new JMenuBar();
+        menuBar.setName("MenuBar");
         menuBar.add(menuFile);
+        menuBar.add(menuSearch);
     }
 
     private void createMainField() {

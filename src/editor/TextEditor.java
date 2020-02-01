@@ -12,7 +12,7 @@ import java.nio.file.Path;
 public class TextEditor extends JFrame {
     private JTextArea textAreaEditor;
     private JPanel northPanel;
-    private JTextField textFieldFilepathAndSearch;
+    private JTextField textFieldSearch;
     private JButton buttonSave;
     private JButton buttonOpen;
     private JButton buttonNextMatch;
@@ -20,24 +20,34 @@ public class TextEditor extends JFrame {
     private JButton buttonStartSearch;
     private JScrollPane scrollPaneEditor;
     private JMenuBar menuBar;
+    private JFileChooser fileChooser;
 
     private int searchStartPos = -1;
     private int searchEndPos = -1;
     private String searchText = "";
 
     private final ActionListener actionListenerSave = actionEvent -> {
+        int choice = fileChooser.showSaveDialog(null);
+        if (choice != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
         try {
-            Path filepath = Path.of(textFieldFilepathAndSearch.getText().trim());
+            Path filepath = fileChooser.getSelectedFile().toPath();
             Files.writeString(filepath, textAreaEditor.getText());
             JOptionPane.showMessageDialog(getContentPane(), "Saved", "Information", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(getContentPane(), "Something went wrong!", "Error", JOptionPane.ERROR_MESSAGE);
         }
+
     };
 
-    private final ActionListener actionListenerLoad = actionEvent -> {
+    private final ActionListener actionListenerOpen = actionEvent -> {
+        int choice = fileChooser.showOpenDialog(null);
+        if (choice != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
         try {
-            Path filepath = Path.of(textFieldFilepathAndSearch.getText());
+            Path filepath = fileChooser.getSelectedFile().toPath();
             textAreaEditor.setText(Files.readString(filepath));
         } catch (IOException e) {
             JOptionPane.showMessageDialog(getContentPane(), "Something went wrong!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -46,7 +56,7 @@ public class TextEditor extends JFrame {
 
     private final ActionListener actionListenerStartSearch = actionEvent -> {
         String text = textAreaEditor.getText();
-        searchText = textFieldFilepathAndSearch.getText();
+        searchText = textFieldSearch.getText();
         searchStartPos = text.indexOf(searchText);
 
         if (searchStartPos != -1) {
@@ -107,6 +117,8 @@ public class TextEditor extends JFrame {
         setTitle("Text Editor");
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        fileChooser = new JFileChooser();
+        fileChooser.setName("FileChooser");
 
         createMenuBar();
         createMainField();
@@ -128,14 +140,14 @@ public class TextEditor extends JFrame {
         JMenuItem menuItemSave = new JMenuItem("Save");
         menuItemSave.addActionListener(actionListenerSave);
         menuItemSave.setName("MenuSave");
-        JMenuItem menuItemLoad = new JMenuItem("Load");
-        menuItemLoad.addActionListener(actionListenerLoad);
-        menuItemLoad.setName("MenuLoad");
+        JMenuItem menuItemOpen = new JMenuItem("Open");
+        menuItemOpen.addActionListener(actionListenerOpen);
+        menuItemOpen.setName("MenuOpen");
         JMenuItem menuItemExit = new JMenuItem("Exit");
         menuItemExit.addActionListener(actionListenerExit);
         menuItemExit.setName("MenuExit");
 
-        menuFile.add(menuItemLoad);
+        menuFile.add(menuItemOpen);
         menuFile.add(menuItemSave);
         menuFile.addSeparator();
         menuFile.add(menuItemExit);
@@ -187,7 +199,7 @@ public class TextEditor extends JFrame {
 
         buttonOpen = new JButton(new ImageIcon("\\icons\\file.png"));
         buttonOpen.setName("OpenButton");
-        buttonOpen.addActionListener(actionListenerLoad);
+        buttonOpen.addActionListener(actionListenerOpen);
         setFixedSize(buttonOpen, buttonWidth, buttonHeight);
 
         buttonSave = new JButton(new ImageIcon("\\icons\\save.png"));
@@ -195,8 +207,8 @@ public class TextEditor extends JFrame {
         buttonSave.addActionListener(actionListenerSave);
         setFixedSize(buttonSave, buttonWidth, buttonHeight);
 
-        textFieldFilepathAndSearch = new JTextField();
-        textFieldFilepathAndSearch.setName("SearchField");
+        textFieldSearch = new JTextField();
+        textFieldSearch.setName("SearchField");
 
         buttonStartSearch = new JButton(new ImageIcon("\\icons\\search.png"));
         buttonStartSearch.setName("StartSearchButton");
@@ -218,7 +230,7 @@ public class TextEditor extends JFrame {
         northPanel.add(Box.createHorizontalStrut(widthBetweenComponents));
         northPanel.add(buttonSave);
         northPanel.add(Box.createHorizontalStrut(widthBetweenComponents));
-        northPanel.add(textFieldFilepathAndSearch);
+        northPanel.add(textFieldSearch);
         northPanel.add(Box.createHorizontalStrut(widthBetweenComponents));
         northPanel.add(buttonStartSearch);
         northPanel.add(Box.createHorizontalStrut(widthBetweenComponents));

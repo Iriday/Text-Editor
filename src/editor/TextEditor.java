@@ -169,7 +169,8 @@ public class TextEditor extends JFrame {
 
     private void createView() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(500, 300);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setSize((int) screenSize.getWidth() / 2, (int) screenSize.getHeight() / 2);
         setTitle("Text Editor");
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

@@ -15,22 +15,24 @@ public class TextEditor extends JFrame {
     private JTextArea textAreaEditor;
     private JPanel northPanel;
     private JTextField textFieldSearch;
-    private JButton buttonSave;
-    private JButton buttonOpen;
-    private JButton buttonNextMatch;
-    private JButton buttonPreviousMatch;
-    private JButton buttonStartSearch;
     private JScrollPane scrollPaneEditor;
     private JMenuBar menuBar;
     private JFileChooser fileChooser;
     private JCheckBox checkBoxUseRegEx;
-
+    //search
+    private Pattern searchPattern;
+    private Matcher searchMatcher;
     private int searchStartPos = -1;
     private int searchEndPos = -1;
     private boolean useRegEx = false;
     private String searchRegEx = "";
     private String searchText = "";
 
+    public TextEditor() {
+        createView();
+    }
+
+    //listeners start
     private final ActionListener actionListenerSave = actionEvent -> {
         int choice = fileChooser.showSaveDialog(null);
         if (choice != JFileChooser.APPROVE_OPTION) {
@@ -59,8 +61,6 @@ public class TextEditor extends JFrame {
         }
     };
 
-    Pattern pattern;
-    Matcher matcher;
     private final ActionListener actionListenerStartSearch = actionEvent -> {
         useRegEx = checkBoxUseRegEx.isSelected();
         String text = textAreaEditor.getText();
@@ -71,22 +71,19 @@ public class TextEditor extends JFrame {
         } else {
             searchRegEx = textFieldSearch.getText();
 
-            pattern = Pattern.compile(searchRegEx);
-            matcher = pattern.matcher(text);
-            if (matcher.find()) {
-                searchText = matcher.group();
-                searchStartPos = matcher.start();
+            searchPattern = Pattern.compile(searchRegEx);
+            searchMatcher = searchPattern.matcher(text);
+            if (searchMatcher.find()) {
+                searchText = searchMatcher.group();
+                searchStartPos = searchMatcher.start();
             } else {
                 searchStartPos = -1;
             }
         }
 
-        if (searchStartPos != -1) {  //method select text if match
+        if (searchStartPos != -1) {
             searchEndPos = searchStartPos + searchText.length();
-
-            textAreaEditor.setCaretPosition(searchEndPos);
-            textAreaEditor.select(searchStartPos, searchEndPos);
-            textAreaEditor.grabFocus();
+            selectText(textAreaEditor, searchStartPos, searchEndPos);
         }
     };
 
@@ -94,7 +91,7 @@ public class TextEditor extends JFrame {
         if (searchText.isEmpty()) {
             return;
         }
-        String text = textAreaEditor.getText().substring(0, searchEndPos -1);
+        String text = textAreaEditor.getText().substring(0, searchEndPos - 1);
 
         if (!useRegEx) {
             searchStartPos = text.lastIndexOf(searchText);
@@ -102,21 +99,21 @@ public class TextEditor extends JFrame {
                 searchStartPos = textAreaEditor.getText().lastIndexOf(searchText);
             }
         } else {
-            matcher = pattern.matcher(text); //update in case user edited text
+            searchMatcher = searchPattern.matcher(text); //update in case user edited text
             String foundLastMatch = "";
             int startPos = -1;
 
-            if (matcher.find(0)) {
-                foundLastMatch = matcher.group();
-                startPos = matcher.start();
+            if (searchMatcher.find(0)) {
+                foundLastMatch = searchMatcher.group();
+                startPos = searchMatcher.start();
             } else { //if the beginning start from the end //regEx search
                 text = textAreaEditor.getText();
-                matcher = pattern.matcher(text);
+                searchMatcher = searchPattern.matcher(text);
             }
 
-            while (matcher.find()) {
-                foundLastMatch = matcher.group();
-                startPos = matcher.start();
+            while (searchMatcher.find()) {
+                foundLastMatch = searchMatcher.group();
+                startPos = searchMatcher.start();
             }
             if (startPos != -1) {
                 searchText = foundLastMatch;
@@ -129,10 +126,7 @@ public class TextEditor extends JFrame {
 
         if (searchStartPos != -1) {
             searchEndPos = searchStartPos + searchText.length();
-
-            textAreaEditor.setCaretPosition(searchEndPos);
-            textAreaEditor.select(searchStartPos, searchEndPos);
-            textAreaEditor.grabFocus();
+            selectText(textAreaEditor, searchStartPos, searchEndPos);
         }
     };
 
@@ -147,35 +141,31 @@ public class TextEditor extends JFrame {
                 searchStartPos = text.indexOf(searchText);
             }
         } else {
-            matcher = pattern.matcher(text); //update in case user edited text
-            if (matcher.find(searchStartPos + 1)) {
-                searchStartPos = matcher.start();
-                searchText = matcher.group();
+            searchMatcher = searchPattern.matcher(text); //update in case user edited text
+            if (searchMatcher.find(searchStartPos + 1)) {
+                searchStartPos = searchMatcher.start();
+                searchText = searchMatcher.group();
             } else { //if the end start from the beginning //regEx search
-                if (matcher.find(0)) {
-                    searchStartPos = matcher.start();
-                    searchText = matcher.group();
+                if (searchMatcher.find(0)) {
+                    searchStartPos = searchMatcher.start();
+                    searchText = searchMatcher.group();
                 } else {
                     searchStartPos = -1;
                 }
             }
         }
 
-
         if (searchStartPos != -1) {
             searchEndPos = searchStartPos + searchText.length();
-
-            textAreaEditor.setCaretPosition(searchEndPos);
-            textAreaEditor.select(searchStartPos, searchEndPos);
-            textAreaEditor.grabFocus();
+            selectText(textAreaEditor, searchStartPos, searchEndPos);
         }
     };
 
-    private final ActionListener actionListenerExit = actionEvent -> dispose();
+    private final ActionListener actionListenerMenuUseRegex = actionEvent ->
+            checkBoxUseRegEx.setSelected(!checkBoxUseRegEx.isSelected());
 
-    public TextEditor() {
-        createView();
-    }
+    private final ActionListener actionListenerExit = actionEvent -> dispose();
+    //listeners end
 
     private void createView() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -183,6 +173,7 @@ public class TextEditor extends JFrame {
         setTitle("Text Editor");
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
         fileChooser = new JFileChooser();
         fileChooser.setName("FileChooser");
         add(fileChooser);
@@ -234,11 +225,8 @@ public class TextEditor extends JFrame {
         menuItemNextMatch.addActionListener(actionListenerNextMatch);
         menuItemNextMatch.setName("MenuNextMatch");
         JMenuItem menuItemUseRegEx = new JMenuItem("Use regex");
-        menuItemUseRegEx.addActionListener(actionEvent -> {
-            checkBoxUseRegEx.setSelected(!checkBoxUseRegEx.isSelected());
-        });
+        menuItemUseRegEx.addActionListener(actionListenerMenuUseRegex);
         menuItemUseRegEx.setName("MenuUseRegExp");
-
 
         menuSearch.add(menuItemStartSearch);
         menuSearch.add(menuItemPreviousMatch);
@@ -270,13 +258,12 @@ public class TextEditor extends JFrame {
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
         northPanel.setBorder(new EmptyBorder(3, 8, 0, 8));
 
-
-        buttonOpen = new JButton(new ImageIcon("\\icons\\file.png"));
+        JButton buttonOpen = new JButton(new ImageIcon("\\icons\\file.png"));
         buttonOpen.setName("OpenButton");
         buttonOpen.addActionListener(actionListenerOpen);
         setFixedSize(buttonOpen, buttonWidth, buttonHeight);
 
-        buttonSave = new JButton(new ImageIcon("\\icons\\save.png"));
+        JButton buttonSave = new JButton(new ImageIcon("\\icons\\save.png"));
         buttonSave.setName("SaveButton");
         buttonSave.addActionListener(actionListenerSave);
         setFixedSize(buttonSave, buttonWidth, buttonHeight);
@@ -284,21 +271,20 @@ public class TextEditor extends JFrame {
         textFieldSearch = new JTextField();
         textFieldSearch.setName("SearchField");
 
-        buttonStartSearch = new JButton(new ImageIcon("\\icons\\search.png"));
+        JButton buttonStartSearch = new JButton(new ImageIcon("\\icons\\search.png"));
         buttonStartSearch.setName("StartSearchButton");
         setFixedSize(buttonStartSearch, buttonWidth, buttonHeight);
         buttonStartSearch.addActionListener(actionListenerStartSearch);
 
-        buttonPreviousMatch = new JButton(new ImageIcon("\\icons\\arrowLeft.png"));
+        JButton buttonPreviousMatch = new JButton(new ImageIcon("\\icons\\arrowLeft.png"));
         buttonPreviousMatch.setName("PreviousMatchButton");
         setFixedSize(buttonPreviousMatch, buttonWidth, buttonHeight);
         buttonPreviousMatch.addActionListener(actionListenerPreviousMatch);
 
-        buttonNextMatch = new JButton(new ImageIcon("\\icons\\arrowRight.png"));
+        JButton buttonNextMatch = new JButton(new ImageIcon("\\icons\\arrowRight.png"));
         buttonNextMatch.setName("NextMatchButton");
         setFixedSize(buttonNextMatch, buttonWidth, buttonHeight);
         buttonNextMatch.addActionListener(actionListenerNextMatch);
-
 
         checkBoxUseRegEx = new JCheckBox("Use regex");
         checkBoxUseRegEx.setName("UseRegExCheckbox");
@@ -324,5 +310,12 @@ public class TextEditor extends JFrame {
         component.setPreferredSize(dimension);
         component.setMinimumSize(dimension);
         return component;
+    }
+
+    public static JTextArea selectText(JTextArea textArea, int startPos, int endPos) {
+        textArea.setCaretPosition(endPos);
+        textArea.select(startPos, endPos);
+        textArea.grabFocus();
+        return textArea;
     }
 }

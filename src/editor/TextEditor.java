@@ -254,17 +254,18 @@ public class TextEditor extends JFrame {
         int buttonWidth = 28;
         int buttonHeight = 24;
         int widthBetweenComponents = 2;
+        String path = "src/editor/icons/";
 
         northPanel = new JPanel();
         northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.X_AXIS));
         northPanel.setBorder(new EmptyBorder(3, 8, 0, 8));
 
-        JButton buttonOpen = new JButton(new ImageIcon("\\icons\\file.png"));
+        JButton buttonOpen = new JButton(new ImageIcon(path + "file.png"));
         buttonOpen.setName("OpenButton");
         buttonOpen.addActionListener(actionListenerOpen);
         setFixedSize(buttonOpen, buttonWidth, buttonHeight);
 
-        JButton buttonSave = new JButton(new ImageIcon("\\icons\\save.png"));
+        JButton buttonSave = new JButton(new ImageIcon(path + "save.png"));
         buttonSave.setName("SaveButton");
         buttonSave.addActionListener(actionListenerSave);
         setFixedSize(buttonSave, buttonWidth, buttonHeight);
@@ -272,17 +273,17 @@ public class TextEditor extends JFrame {
         textFieldSearch = new JTextField();
         textFieldSearch.setName("SearchField");
 
-        JButton buttonStartSearch = new JButton(new ImageIcon("\\icons\\search.png"));
+        JButton buttonStartSearch = new JButton(new ImageIcon(path + "search.png"));
         buttonStartSearch.setName("StartSearchButton");
         setFixedSize(buttonStartSearch, buttonWidth, buttonHeight);
         buttonStartSearch.addActionListener(actionListenerStartSearch);
 
-        JButton buttonPreviousMatch = new JButton(new ImageIcon("\\icons\\arrowLeft.png"));
+        JButton buttonPreviousMatch = new JButton(new ImageIcon(path + "arrowLeft.png"));
         buttonPreviousMatch.setName("PreviousMatchButton");
         setFixedSize(buttonPreviousMatch, buttonWidth, buttonHeight);
         buttonPreviousMatch.addActionListener(actionListenerPreviousMatch);
 
-        JButton buttonNextMatch = new JButton(new ImageIcon("\\icons\\arrowRight.png"));
+        JButton buttonNextMatch = new JButton(new ImageIcon(path + "arrowRight.png"));
         buttonNextMatch.setName("NextMatchButton");
         setFixedSize(buttonNextMatch, buttonWidth, buttonHeight);
         buttonNextMatch.addActionListener(actionListenerNextMatch);

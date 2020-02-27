@@ -11,6 +11,8 @@ import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static editor.Utils.*;
+
 public class TextEditor extends JFrame {
     private JTextArea textAreaEditor;
     private JPanel northPanel;
@@ -304,20 +306,5 @@ public class TextEditor extends JFrame {
         northPanel.add(buttonNextMatch);
         northPanel.add(Box.createHorizontalStrut(widthBetweenComponents));
         northPanel.add(checkBoxUseRegEx);
-    }
-
-    public static JComponent setFixedSize(JComponent component, int width, int height) {
-        Dimension dimension = new Dimension(width, height);
-        component.setMaximumSize(dimension);
-        component.setPreferredSize(dimension);
-        component.setMinimumSize(dimension);
-        return component;
-    }
-
-    public static JTextArea selectText(JTextArea textArea, int startPos, int endPos) {
-        textArea.setCaretPosition(endPos);
-        textArea.select(startPos, endPos);
-        textArea.grabFocus();
-        return textArea;
     }
 }
